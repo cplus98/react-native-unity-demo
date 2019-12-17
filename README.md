@@ -11,4 +11,7 @@ Current version is iOS only.
 5. Import Unity-iPhone project into workspece.
 6. Change "Unity-iPhone>Data" Target membership to "UnityFramework".
 7. Change "Unity-iPhone>Libraries>Plugins>iOS>NativeCallProxy.h" Target membership to "UnityFramework (public)".
-8. Build project.
+8. Import Unity-iPhone>Products>UnityFramework.framework file into Project Settings>Build Phases>Embeded Frameworks.
+- Drag Unity-iPhone>Products>UnityFramework.framework to Project Settings>Frameworks, Libraries, and Embedded Content
+- After remove UnityFramework.framework in Project Settings>Build Phases>Link Binary With Libraries.
+9. Build project.
