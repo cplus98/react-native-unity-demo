@@ -22,7 +22,7 @@ const Unity3DProvider = ({ listener, children }: Unity3DListenerProps) => {
 			// Unsubscribe messages
 			subscription.remove();
 		};
-	}, []);
+	}, [listener]);
 
 	return <>{children}</>;
 };
