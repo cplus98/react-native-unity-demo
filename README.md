@@ -4,7 +4,7 @@ React Native + Unity3D Demo
 Current version is iOS only.
 
 # How to Build (iOS)
-1. Build Unity3D into "unity/build/ios" folder.
+1. Run Unity3D and build project for iOS into "unity/build/ios" folder.
 2. Run command "yarn install".
 3. Run command "pod install" in ios folder.
 4. Open ios workspace.
