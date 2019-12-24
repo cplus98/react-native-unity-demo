@@ -11,11 +11,66 @@
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTViewManager.h>
 #import <React/RCTEventEmitter.h>
+#import <React/RCTViewManager.h>
 
 int gArgc = 0;
 char** gArgv = nil;
 NSDictionary *appLaunchOpts = nil;
 AppDelegate *mainDelegate = nil;
+
+UnityFramework* UnityFrameworkLoad() {
+    NSString* bundlePath = nil;
+    bundlePath = [[NSBundle mainBundle] bundlePath];
+    bundlePath = [bundlePath stringByAppendingString: @"/Frameworks/UnityFramework.framework"];
+
+    NSBundle* bundle = [NSBundle bundleWithPath: bundlePath];
+    if ([bundle isLoaded] == false) [bundle load];
+
+    UnityFramework* ufw = [bundle.principalClass getInstance];
+    if (![ufw appController]) {
+        // unity is not initialized
+        [ufw setExecuteHeader: &_mh_execute_header];
+    }
+    return ufw;
+}
+
+BOOL isInitializedUnity = false;
+
+@interface RNUnityViewManager : RCTViewManager
+//@property (nonatomic, strong) RNUnityView *currentView;
+@end
+
+@implementation RNUnityViewManager
+RCT_EXPORT_MODULE(Unity3DView)
+
+- (UIView *)view {
+  if (isInitializedUnity) {
+    UIView *view = [[[mainDelegate ufw] appController] rootView];
+    [[mainDelegate ufw] showUnityWindow];
+    return view;
+  }
+  isInitializedUnity = true;
+
+  // Always keep RN window in top
+  UIApplication* application = [UIApplication sharedApplication];
+  application.keyWindow.windowLevel = UIWindowLevelNormal + 1;
+
+  [mainDelegate initReactNativeAndUnity];
+
+  UIView *view = [[[mainDelegate ufw] appController] rootView];
+  view.userInteractionEnabled = YES;
+  return view;
+}
+
+- (dispatch_queue_t)methodQueue {
+    return dispatch_get_main_queue();
+}
+
++ (BOOL)requiresMainQueueSetup {
+    return YES;
+}
+
+@end
 
 //--------------------------------------------------
 // React Native - Native Module method, called from RN bundle
@@ -23,7 +78,7 @@ AppDelegate *mainDelegate = nil;
 @end
 @implementation Unity3D
 {
-	bool hasListeners;
+  bool hasListeners;
 }
 RCT_EXPORT_MODULE();
 - (dispatch_queue_t)methodQueue {
@@ -45,35 +100,7 @@ RCT_EXPORT_METHOD(pause:(BOOL)pause) {
 @end
 //--------------------------------------------------
 
-//--------------------------------------------------
-@interface RootViewController : UIViewController
-@end
-
-@implementation RootViewController
-- (void)viewDidLoad {
-  [super viewDidLoad];
-  [mainDelegate initReactNativeAndUnity];
-}
-@end
-//--------------------------------------------------
-
 @implementation AppDelegate
-
-UnityFramework* UnityFrameworkLoad() {
-    NSString* bundlePath = nil;
-    bundlePath = [[NSBundle mainBundle] bundlePath];
-    bundlePath = [bundlePath stringByAppendingString: @"/Frameworks/UnityFramework.framework"];
-
-    NSBundle* bundle = [NSBundle bundleWithPath: bundlePath];
-    if ([bundle isLoaded] == false) [bundle load];
-
-    UnityFramework* ufw = [bundle.principalClass getInstance];
-    if (![ufw appController]) {
-        // unity is not initialized
-        [ufw setExecuteHeader: &_mh_execute_header];
-    }
-    return ufw;
-}
 
 - (void)initReactNativeAndUnity {
   // Init Unity3D
@@ -82,21 +109,12 @@ UnityFramework* UnityFrameworkLoad() {
   [[self ufw] registerFrameworkListener: self];
   [NSClassFromString(@"FrameworkLibAPI") registerAPIforNativeCalls:self];
   [[self ufw] runEmbeddedWithArgc: gArgc argv: gArgv appLaunchOpts: appLaunchOpts];
-  CGRect rcUnityView = [[[self ufw] appController] rootView].frame;
-
-  // Init React Native
-  RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:appLaunchOpts];
-  self.reactView = [[RCTRootView alloc] initWithBridge:bridge moduleName:@"ReactNativeUnityDemo" initialProperties:nil];
-  self.reactView.frame = rcUnityView;
-  self.reactView.backgroundColor = UIColor.clearColor; // transparent view on ios, only items set in react can be seen
-
-  UIView *unityView = [[[self ufw] appController] rootView];
-  [unityView addSubview:self.reactView];
 }
 
 // Send message from Unity to React
 - (void)unityMessage:(NSString*)msg {
   [[[[self reactView] bridge] moduleForName:@"Unity3D"] sendMessageToReact:msg];
+  NSLog(@"%@", msg);
 }
 
 // Base method to send message from Native to Unity, targets NativeEventReciver GameObject
@@ -112,9 +130,21 @@ UnityFramework* UnityFrameworkLoad() {
   appLaunchOpts = launchOptions;
   mainDelegate = self;
   
+  RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
+  RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge
+                                                   moduleName:@"ReactNativeUnityDemo"
+                                            initialProperties:nil];
+
+  rootView.backgroundColor = [[UIColor alloc] initWithRed:1.0f green:1.0f blue:1.0f alpha:1];
+
   self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-  self.window.rootViewController = [RootViewController new];
+  UIViewController *rootViewController = [UIViewController new];
+  rootViewController.view = rootView;
+  self.window.rootViewController = rootViewController;
   [self.window makeKeyAndVisible];
+
+  self.reactView = rootView;
+  
   return YES;
 }
 

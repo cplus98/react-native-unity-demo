@@ -22,7 +22,6 @@ extern NSDictionary* appLaunchOpts;
 @property (nonatomic, strong) UIWindow *window;
 @property UnityFramework *ufw;
 @property RCTRootView *reactView;
-@property (nonatomic, copy) RCTBubblingEventBlock onUnityMessage;
 
 - (void)initReactNativeAndUnity;
 - (void)sendMessageToUnity3D:(const char*)msg;

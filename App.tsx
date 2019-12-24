@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, Button, StatusBar, NativeEventEmitter, NativeModules } from 'react-native';
+import { View, StyleSheet, Button, StatusBar, Text } from 'react-native';
 
-import { Unity3DProvider, pauseUnity3D, sendMessageToUnity3D } from './react-unity-view';
+import { Unity3DView, pauseUnity3D, sendMessageToUnity3D } from './react-unity-view';
 
 const subscription = (data: any) => {
 	console.log('the event fired!~~');
@@ -12,9 +12,10 @@ const App = () => {
 	const [paused, setPause] = useState(false);
 
 	return (
-		<Unity3DProvider listener={subscription}>
+		<>
 			<StatusBar hidden />
-			<SafeAreaView style={styles.container}>
+			<Unity3DView listener={subscription}></Unity3DView>
+			<View style={{ marginTop: 200 }}>
 				<Button
 					title="Send Message To Unity3D"
 					onPress={() => {
@@ -33,8 +34,8 @@ const App = () => {
 						pauseUnity3D(!paused);
 					}}
 				/>
-			</SafeAreaView>
-		</Unity3DProvider>
+			</View>
+		</>
 	);
 };
 
