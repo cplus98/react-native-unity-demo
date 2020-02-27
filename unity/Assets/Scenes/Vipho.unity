@@ -307,7 +307,7 @@ GameObject:
   - component: {fileID: 1159689838}
   - component: {fileID: 1159689837}
   m_Layer: 0
-  m_Name: ReactEventReciver
+  m_Name: ReactEventReceiver
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
