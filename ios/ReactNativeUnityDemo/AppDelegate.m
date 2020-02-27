@@ -117,9 +117,9 @@ RCT_EXPORT_METHOD(pause:(BOOL)pause) {
   NSLog(@"%@", msg);
 }
 
-// Base method to send message from Native to Unity, targets NativeEventReciver GameObject
+// Base method to send message from Native to Unity, targets ReactEventReceiver GameObject
 - (void)sendMessageToUnity3D:(const char*)msg {
-  [[self ufw] sendMessageToGOWithName: "ReactEventReciver" functionName: "OnReactMessage" message: msg];
+  [[self ufw] sendMessageToGOWithName: "ReactEventReceiver" functionName: "OnReactMessage" message: msg];
 }
 
 - (void)pauseUnity3D:(bool)pause {
