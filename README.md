@@ -4,7 +4,6 @@ Supports iOS and Android both.
 
 Requirements:
 Android Studio 3.4.2+
-XCode 10.0+
 Unity version 2019.3.0b4+
 
 # How to Build (iOS)
